@@ -1,10 +1,9 @@
 
 from collections import defaultdict
-from datetime import datetime, timezone
-import json
-
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from datetime import datetime, timezone
+import json
 
 app = FastAPI(title="GapYar API")
 
@@ -70,6 +69,7 @@ async def chat(websocket: WebSocket, username: str):
                 "time": datetime.now(timezone.utc).isoformat()
             }
 
+            # تحویل پیام به تمام اتصال‌های آنلاین گیرنده
             for client in list(connections.get(recipient, set())):
                 try:
                     await client.send_json(payload)
@@ -80,5 +80,6 @@ async def chat(websocket: WebSocket, username: str):
         pass
     finally:
         connections[username].discard(websocket)
+
         if not connections[username]:
             connections.pop(username, None)
